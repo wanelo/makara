@@ -21,7 +21,7 @@ describe 'Integration of Makara Adapter to Real World Events' do
   let(:select){ 'select * from users' }
   let(:insert){ 'insert into users ...' }
   let(:complex){ 'insert into users values (select * from people)' }
-  let(:unkown){ 'some random query we dont know about' }
+  let(:unknown){ "some random query we dont know about" }
 
   let(:master){ adapter.mcon      }
   let(:slaveA){ adapter.scon(1)    }
@@ -153,8 +153,8 @@ describe 'Integration of Makara Adapter to Real World Events' do
     end
 
     it '(11) send unrecognized queries to master' do
-      master.should_receive(:execute).with(unkown, nil).once
-      adapter.execute(unkown)
+      master.should_receive(:execute).with(unknown, nil).once
+      adapter.execute(unknown)
     end
 
     it '(12) can call verify without blowing up when one slave node is down' do
