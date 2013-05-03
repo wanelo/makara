@@ -2,18 +2,18 @@ require 'spec_helper'
 
 describe 'Integration of Makara Adapter to Real World Events' do
 
-  # Test Cases (assuming 3 DBs, Master, slave-a, slave-b) 
-  # 1) slaves a and b go down; all requests go to master 
-  # 2) slave a goes down, then comes back; traffic should eventually go back to slave a 
-  # 3) slave a goes down; while down, all reads to slave b 
-  # 4) master goes down, slaves are up; writes should cause normal rails exceptions 
-  # 5) master goes down, all slaves also down; all sql actions should cause normal rails exceptions 
-  # 6) master goes down, all writes cause errors, then master comes back; app should reconnect to master 
+  # Test Cases (assuming 3 DBs, Master, slave-a, slave-b)
+  # 1) slaves a and b go down; all requests go to master
+  # 2) slave a goes down, then comes back; traffic should eventually go back to slave a
+  # 3) slave a goes down; while down, all reads to slave b
+  # 4) master goes down, slaves are up; writes should cause normal rails exceptions
+  # 5) master goes down, all slaves also down; all sql actions should cause normal rails exceptions
+  # 6) master goes down, all writes cause errors, then master comes back; app should reconnect to master
   # 7) we can force (or unforce) a process (rake/DJ) to only be on master and ignore the slaves
-  # 8) test stickyness of slaves (read from slave A, you shouldn't read from slave B) 
-  # 9) test stickyness of master (write first, then all reads should stay on master) 
-  # 10) complex queries (insert into… where select a from b) still go to master 
-  # 11) oddball queries all go to master (grant ALL to user@host…) 
+  # 8) test stickyness of slaves (read from slave A, you shouldn't read from slave B)
+  # 9) test stickyness of master (write first, then all reads should stay on master)
+  # 10) complex queries (insert into… where select a from b) still go to master
+  # 11) oddball queries all go to master (grant ALL to user@host…)
   # 12) i should be able to verify my connection at the beginning of a request
 
   before { connect!(config) }
@@ -23,9 +23,9 @@ describe 'Integration of Makara Adapter to Real World Events' do
   let(:complex){ 'insert into users values (select * from people)' }
   let(:unknown){ "some random query we dont know about" }
 
-  let(:master){ adapter.mcon      }
-  let(:slaveA){ adapter.scon(1)    }
-  let(:slaveB){ adapter.scon(2)    }
+  let(:master){ adapter.mcon }
+  let(:slaveA){ adapter.scon(1) }
+  let(:slaveB){ adapter.scon(2) }
 
   context 'with a dry configuration' do
 
@@ -167,7 +167,7 @@ describe 'Integration of Makara Adapter to Real World Events' do
       adapter.should_not be_stuck
     end
 
-  end 
+  end
 
   def later
     Delorean.time_travel_to 70.seconds.from_now do
