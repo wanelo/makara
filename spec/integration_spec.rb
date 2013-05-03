@@ -20,7 +20,7 @@ describe 'Integration of Makara Adapter to Real World Events' do
 
   let(:select){ "select * from users" }
   let(:insert){ "insert into users (name) values ('whatever')" }
-  let(:complex){ "insert into users values (select * from people)" }
+  let(:complex){ "insert into users (name) select name from people" }
   let(:unknown){ "some random query we dont know about" }
 
   let(:master){ adapter.mcon }
@@ -34,20 +34,24 @@ describe 'Integration of Makara Adapter to Real World Events' do
 
     it '(1) should route all requests to the master if both slaves go down' do
       down!(slaveA, slaveB)
-      master.should_receive(:execute).with(select, nil)
+      master.should_receive(:execute).with(select, nil).and_call_original
 
-      adapter.execute(select)
+      expect(adapter.execute(select)).to_not be_nil
     end
 
     it '(2) should give traffic back to a revived slave' do
       slaveA.should_receive(:reconnect!).and_return(true)
       down!(slaveA)
 
-      2.times{ adapter.execute(select) }
+      2.times do
+        expect(adapter.execute(select)).to_not be_nil
+      end
 
       later do
         up!(slaveA)
-        2.times{ adapter.execute(select) }
+        2.times do
+          expect(adapter.execute(select)).to_not be_nil
+        end
       end
     end
 
@@ -55,7 +59,9 @@ describe 'Integration of Makara Adapter to Real World Events' do
       down!(slaveA)
       slaveA.should_receive(:execute).never
 
-      5.times{ adapter.execute(select) }
+      5.times do
+        expect(adapter.execute(select)).to_not be_nil
+      end
     end
 
     it '(4) should raise exceptions when master goes down' do
@@ -86,40 +92,49 @@ describe 'Integration of Makara Adapter to Real World Events' do
       later do
         up!(master)
         lambda{
-          adapter.execute(insert)
+          expect(adapter.execute(insert)).to_not be_nil
         }.should_not raise_error
       end
     end
 
 
     it '(7) can be forced to use the master' do
-      master.should_receive(:execute).with(select, nil).twice
-      master.should_receive(:execute).with(insert, nil).twice
+      master.should_receive(:execute).with(select, nil).twice.and_call_original
+      master.should_receive(:execute).with(insert, nil).twice.and_call_original
 
       adapter.force_master!
 
-      2.times{ adapter.execute(select) }
-      2.times{ adapter.execute(insert) }
+      2.times do
+        expect(adapter.execute(select)).to_not be_nil
+      end
+
+      2.times do
+        expect(adapter.execute(insert)).to_not be_nil
+      end
     end
 
     it '(7) can unforce the master' do
       down!(slaveA)
-      master.should_receive(:execute).with(select, nil).twice
-      slaveB.should_receive(:execute).with(select, nil).twice
+      master.should_receive(:execute).with(select, nil).twice.and_call_original
+      slaveB.should_receive(:execute).with(select, nil).twice.and_call_original
 
       adapter.force_master!
 
-      2.times{ adapter.execute(select) }
+      2.times do
+        expect(adapter.execute(select)).to_not be_nil
+      end
 
       adapter.unforce_master!
 
-      2.times{ adapter.execute(select) }
+      2.times do
+        expect(adapter.execute(select)).to_not be_nil
+      end
     end
 
     it '(12) can call verify without blowing up when one slave node is down' do
       down!(slaveA)
 
-      lambda{
+      lambda {
         adapter.verify!
       }.should_not raise_error
 
@@ -132,29 +147,35 @@ describe 'Integration of Makara Adapter to Real World Events' do
 
     let(:config){ multi_slave_config }
 
-    it '(8) should stick to a slave once it\'s used' do
+    it "(8) should stick to a slave once it's used" do
       slaveA.should_receive(:execute).never
-      10.times{ adapter.execute(select) }
+      10.times do
+        expect(adapter.execute(select)).to_not be_nil
+      end
     end
 
-    it '(9) should stick to the master for all queries once it\'s used' do
+    it "(9) should stick to the master for all queries once it's used" do
       adapter.execute(insert)
       slaveA.should_receive(:execute).never
       slaveB.should_receive(:execute).never
 
-      master.should_receive(:execute).with(select, nil).exactly(10).times
+      master.should_receive(:execute).with(select, nil).exactly(10).times.and_call_original
 
-      10.times{ adapter.execute(select) }
+      10.times do
+        expect(adapter.execute(select)).to_not be_nil
+      end
     end
 
     it '(10) should send complex queries including subselects to master' do
-      master.should_receive(:execute).with(complex, nil).once
-      adapter.execute(complex)
+      master.should_receive(:execute).with(complex, nil).once.and_call_original
+      expect(adapter.execute(complex)).to_not be_nil
     end
 
     it '(11) send unrecognized queries to master' do
-      master.should_receive(:execute).with(unknown, nil).once
-      adapter.execute(unknown)
+      master.should_receive(:execute).with(unknown, nil).once.and_call_original
+      expect {
+        adapter.execute(unknown)
+      }.to raise_error(ActiveRecord::StatementInvalid, /syntax error/i)
     end
 
     it '(12) can call verify without blowing up when one slave node is down' do
