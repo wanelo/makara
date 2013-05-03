@@ -18,9 +18,9 @@ describe 'Integration of Makara Adapter to Real World Events' do
 
   before { connect!(config) }
 
-  let(:select){ 'select * from users' }
-  let(:insert){ 'insert into users ...' }
-  let(:complex){ 'insert into users values (select * from people)' }
+  let(:select){ "select * from users" }
+  let(:insert){ "insert into users (name) values ('whatever')" }
+  let(:complex){ "insert into users values (select * from people)" }
   let(:unknown){ "some random query we dont know about" }
 
   let(:master){ adapter.mcon }
