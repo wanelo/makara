@@ -26,6 +26,7 @@ module MakaraDatabase
   def create
     case config['adapter']
     when nil
+      return
     when /postgresql/
       ActiveRecord::Base.establish_connection(config.merge('database' => 'postgres', 'schema_search_path' => 'public'))
       ActiveRecord::Base.connection.create_database(config['database'], config.merge('encoding' => 'utf8'))
@@ -46,6 +47,7 @@ module MakaraDatabase
 
     case config['adapter']
     when nil
+      return
     when /mysql/
       ActiveRecord::Base.establish_connection(config)
       ActiveRecord::Base.connection.drop_database config['database']
