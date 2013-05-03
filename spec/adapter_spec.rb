@@ -39,7 +39,7 @@ describe ActiveRecord::ConnectionAdapters::MakaraAdapter do
   end
 
   describe 'establishing connections' do
-    let(:base_config) { {:adapter => 'abstract', :database => 'test_db', :host => 'localhost', :port => '3439'} }
+    let(:base_config) { {:adapter => 'abstract', :database => 'makara_test', :host => '127.0.0.1', :port => 5432} }
     let(:master_config) { base_config.merge({:name => 'master', :role => 'master'}) }
     let(:slave_config) { base_config.merge({:name => 'slave1'}) }
 

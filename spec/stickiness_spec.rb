@@ -53,9 +53,9 @@ describe 'Makara Adapter Stickiness' do
   end
 
   context 'with a dry master' do
-    
+
     let(:config){ multi_slave_config.merge(:sticky_master => false) }
-    
+
     it 'should return to the sticky slave if the master is not sticky' do
       adapter.scon(1).should_receive(:execute).never
       adapter.scon(2).should_receive(:execute).with('select * from users', nil).once
@@ -99,7 +99,7 @@ describe 'Makara Adapter Stickiness' do
       adapter.scon(2).should_receive(:execute).with('select * from dogs', nil).once
       adapter.scon(1).should_receive(:execute).with('select * from cats', nil).once
       adapter.mcon.should_receive(:execute).with('insert into animals...', nil).once
-      adapter.scon(2).should_receive(:execute).with('select * from pumas', nil).once  
+      adapter.scon(2).should_receive(:execute).with('select * from pumas', nil).once
       adapter.scon(1).should_receive(:execute).with('select * from panthers', nil).once
 
       adapter.execute('select * from dogs')

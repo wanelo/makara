@@ -43,13 +43,24 @@ RSpec.configure do |config|
     ActiveRecord::Base.connection
   end
 
+  def adapter_class
+    case config[:db_adapter]
+    when 'abstract'
+      ActiveRecord::ConnectionAdapters::AbstractAdapter
+    when 'postgresql'
+      ActiveRecord::ConnectionAdapters::PostgreSQLAdapter
+    when 'mysql'
+      ActiveRecord::ConnectionAdapters::MysqlAdapter
+    end
+  end
+
   def simple_config
     {
       :adapter => 'makara',
-      :db_adapter => 'abstract',
-      :database => 'test_db',
-      :host => 'localhost',
-      :port => '3439',
+      :db_adapter => ENV['MAKARA_ADAPTER'] || 'abstract',
+      :database => 'makara_test',
+      :host => ENV['MAKARA_HOST'] || '127.0.0.1',
+      :port => (ENV['MAKARA_PORT'] || 5432).to_i,
       :databases => [
         {:name => 'master', :role => 'master'}
       ]

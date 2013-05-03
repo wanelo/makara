@@ -11,7 +11,7 @@ describe 'Adapter Setup and Initialization' do
 
     it 'should initialize a single master database with no slaves' do
       adapter.should be_master_only
-      adapter.master.connection.class.should eql(ActiveRecord::ConnectionAdapters::AbstractAdapter)
+      adapter.master.connection.class.should eql(adapter_class)
     end
 
     it 'should always return the master as the correct wrapper' do
@@ -41,7 +41,7 @@ describe 'Adapter Setup and Initialization' do
       adapter.should_not be_master_only
       adapter.should be_slaved(1)
 
-      adapter.slave(1).connection.class.should eql(ActiveRecord::ConnectionAdapters::AbstractAdapter)
+      adapter.slave(1).connection.class.should eql(adapter_class)
 
       adapter.slave(1).name.should eql('slave1')
     end
@@ -73,7 +73,7 @@ describe 'Adapter Setup and Initialization' do
       adapter.should be_slaved(2)
 
       [1,2].each do |num|
-        adapter.slave(num).connection.class.should eql(ActiveRecord::ConnectionAdapters::AbstractAdapter)
+        adapter.slave(num).connection.class.should eql(adapter_class)
       end
 
       adapter.slave(1).name.should eql('Slave One')
