@@ -52,8 +52,10 @@ RSpec.configure do |config|
       ActiveRecord::ConnectionAdapters::AbstractAdapter
     when 'postgresql'
       ActiveRecord::ConnectionAdapters::PostgreSQLAdapter
-    when 'mysql'
-      ActiveRecord::ConnectionAdapters::MysqlAdapter
+    when 'mysql2'
+      ActiveRecord::ConnectionAdapters::Mysql2Adapter
+    else
+      raise "Unknown database adapter '#{config[:db_adapter]}'"
     end
   end
 

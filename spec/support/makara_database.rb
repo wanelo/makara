@@ -38,7 +38,7 @@ module MakaraDatabase
     Migrator.new.migrate(:up)
     ActiveRecord::Base.clear_all_connections!
   rescue => e
-    raise e unless e.message.match(/already exists/)
+    raise e unless e.message.match(/(already|database) exists/)
   end
 
   def drop
