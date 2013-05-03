@@ -32,9 +32,7 @@ describe Makara::Middleware do
     $1 ? $1.to_s.split(';').first : nil
   end
 
-  before do
-    connect!(config)
-  end
+  before { connect!(config) }
 
   let(:config){ single_slave_config }
 

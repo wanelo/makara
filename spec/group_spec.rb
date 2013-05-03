@@ -2,9 +2,7 @@ require 'spec_helper'
 
 describe 'Makara::ConnectionGroup' do
 
-  before do
-    connect!(config)
-  end
+  before { connect!(config) }
 
   let(:config){ single_slave_config }
 

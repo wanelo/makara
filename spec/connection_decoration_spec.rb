@@ -3,9 +3,7 @@ require 'spec_helper'
 
 describe 'Makara Connection Decoration' do
 
-  before do
-    connect!(config)
-  end
+  before { connect!(config) }
 
   let(:config){ simple_config }
   let(:con){ adapter.mcon }

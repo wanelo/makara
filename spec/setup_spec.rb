@@ -2,9 +2,7 @@ require 'spec_helper'
 
 describe 'Adapter Setup and Initialization' do
 
-  before do
-    connect!(config)
-  end
+  before { connect!(config) }
 
   context 'with no slaves configured' do
     let(:config) { simple_config }

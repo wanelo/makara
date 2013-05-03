@@ -2,9 +2,7 @@ require 'spec_helper'
 
 describe Makara::Connection::ErrorHandler do
 
-  before do
-    connect!(config)
-  end
+  before { connect!(config) }
 
   let(:config){ single_slave_config }
   let(:handler){ adapter.instance_variable_get('@exception_handler') }

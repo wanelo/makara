@@ -2,9 +2,7 @@ require 'spec_helper'
 
 describe ActiveRecord::ConnectionAdapters::MakaraAdapter do
 
-  before do
-    connect!(config)
-  end
+  before { connect!(config) }
 
   let(:config){ dry_single_slave_config }
 

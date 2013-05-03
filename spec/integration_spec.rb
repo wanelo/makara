@@ -16,9 +16,7 @@ describe 'Integration of Makara Adapter to Real World Events' do
   # 11) oddball queries all go to master (grant ALL to user@host…) 
   # 12) i should be able to verify my connection at the beginning of a request
 
-  before do
-    connect!(config)
-  end
+  before { connect!(config) }
 
   let(:select){ 'select * from users' }
   let(:insert){ 'insert into users ...' }

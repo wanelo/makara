@@ -2,13 +2,10 @@ require 'spec_helper'
 
 describe 'Makara Connection Wrappers' do
 
-  before do
-    connect!(config)
-  end
+  before { connect!(config) }
 
   let(:config){ single_slave_config }
   let(:one){ adapter.slave(1) }
-
 
   describe '#blacklist!' do
 
