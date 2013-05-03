@@ -39,22 +39,23 @@ describe ActiveRecord::ConnectionAdapters::MakaraAdapter do
   end
 
   describe 'establishing connections' do
-    let(:base_config) { {:adapter => 'abstract', :database => 'makara_test', :host => '127.0.0.1', :port => 5432} }
+    let(:base_config) { config.slice(:database, :host, :port).merge(:adapter => config[:db_adapter]) }
     let(:master_config) { base_config.merge({:name => 'master', :role => 'master'}) }
     let(:slave_config) { base_config.merge({:name => 'slave1'}) }
+    let(:connection_method) { config[:db_adapter] + "_connection" }
 
     context 'when a slave is down' do
       it 'skips the slave without an error' do
-        ActiveRecord::Base.should_receive(:abstract_connection).with(master_config).and_call_original
-        ActiveRecord::Base.should_receive(:abstract_connection).with(slave_config).and_raise(ActiveRecord::ConnectionNotEstablished)
+        ActiveRecord::Base.should_receive(connection_method).with(master_config).and_call_original
+        ActiveRecord::Base.should_receive(connection_method).with(slave_config).and_raise(ActiveRecord::ConnectionNotEstablished)
         expect { ActiveRecord::Base.makara_connection(config) }.not_to raise_error
       end
     end
 
     context 'when a master is down' do
       it 'raises error from connection attempt' do
-        ActiveRecord::Base.should_receive(:abstract_connection).with(master_config).and_raise(ActiveRecord::ConnectionNotEstablished)
-        ActiveRecord::Base.should_receive(:abstract_connection).with(slave_config).never
+        ActiveRecord::Base.should_receive(connection_method).with(master_config).and_raise(ActiveRecord::ConnectionNotEstablished)
+        ActiveRecord::Base.should_receive(connection_method).with(slave_config).never
         expect { ActiveRecord::Base.makara_connection(config) }.to raise_error(ActiveRecord::ConnectionNotEstablished)
       end
     end
