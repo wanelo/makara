@@ -27,14 +27,24 @@ describe 'Integration of Makara Adapter to Real World Events' do
   let(:slaveA){ adapter.scon(1) }
   let(:slaveB){ adapter.scon(2) }
 
+  context 'with a default configuration' do
+    let(:config) { simple_config }
+
+    it '(0) returns data from the execute method' do
+      expect(adapter.execute(select)).to_not be_nil
+    end
+  end
+
   context 'with a dry configuration' do
 
-    let(:config){ dry_multi_slave_config  }
-
+    let(:config){ dry_multi_slave_config }
 
     it '(1) should route all requests to the master if both slaves go down' do
       down!(slaveA, slaveB)
-      master.should_receive(:execute).with(select, nil).and_call_original
+      # Crazy workaround for a Ruby 2 bug in defined?(super). For more information
+      # see this gist: https://gist.github.com/indirect/5514723
+      result = master.execute(select)
+      master.should_receive(:execute).with(select, nil) { result }
 
       expect(adapter.execute(select)).to_not be_nil
     end
@@ -99,8 +109,10 @@ describe 'Integration of Makara Adapter to Real World Events' do
 
 
     it '(7) can be forced to use the master' do
-      master.should_receive(:execute).with(select, nil).twice.and_call_original
-      master.should_receive(:execute).with(insert, nil).twice.and_call_original
+      select_result = master.execute(select)
+      insert_result = master.execute(insert)
+      master.should_receive(:execute).with(select, nil).twice { select_result }
+      master.should_receive(:execute).with(insert, nil).twice { insert_result }
 
       adapter.force_master!
 
@@ -115,8 +127,12 @@ describe 'Integration of Makara Adapter to Real World Events' do
 
     it '(7) can unforce the master' do
       down!(slaveA)
-      master.should_receive(:execute).with(select, nil).twice.and_call_original
-      slaveB.should_receive(:execute).with(select, nil).twice.and_call_original
+
+      result = master.execute(select)
+      master.should_receive(:execute).with(select, nil).twice { result }
+
+      result = slaveB.execute(select)
+      slaveB.should_receive(:execute).with(select, nil).twice { result }
 
       adapter.force_master!
 
@@ -159,7 +175,8 @@ describe 'Integration of Makara Adapter to Real World Events' do
       slaveA.should_receive(:execute).never
       slaveB.should_receive(:execute).never
 
-      master.should_receive(:execute).with(select, nil).exactly(10).times.and_call_original
+      result = master.execute(select)
+      master.should_receive(:execute).with(select, nil).exactly(10).times { result }
 
       10.times do
         expect(adapter.execute(select)).to_not be_nil
@@ -167,12 +184,16 @@ describe 'Integration of Makara Adapter to Real World Events' do
     end
 
     it '(10) should send complex queries including subselects to master' do
-      master.should_receive(:execute).with(complex, nil).once.and_call_original
+      result = master.execute(complex)
+      master.should_receive(:execute).once.with(complex, nil) { result }
       expect(adapter.execute(complex)).to_not be_nil
     end
 
     it '(11) send unrecognized queries to master' do
-      master.should_receive(:execute).with(unknown, nil).once.and_call_original
+      master.should_receive(:execute).with(unknown, nil).once {
+        raise ActiveRecord::StatementInvalid, "syntax error"
+      }
+
       expect {
         adapter.execute(unknown)
       }.to raise_error(ActiveRecord::StatementInvalid, /syntax error/i)
