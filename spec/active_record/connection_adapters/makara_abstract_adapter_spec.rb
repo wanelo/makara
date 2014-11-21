@@ -21,6 +21,7 @@ describe ActiveRecord::ConnectionAdapters::MakaraAbstractAdapter do
     'set @@things' => true,
     'commit' => true,
     'select * from felines' => false,
+    '   select * from felines' => false,
     'select * from users for update' => true,
     'select * from users lock in share mode' => true,
     'select * from users where name = "for update"' => false,

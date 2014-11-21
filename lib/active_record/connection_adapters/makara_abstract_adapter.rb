@@ -65,7 +65,7 @@ module ActiveRecord
 
 
       SQL_MASTER_MATCHERS     = [/^select.+for update$/i, /select.+lock in share mode$/i]
-      SQL_SLAVE_MATCHER       = /^select\s/i
+      SQL_SLAVE_MATCHER       = /^\s*select\s/i
       SQL_ALL_MATCHER         = /^set\s/i
 
 
