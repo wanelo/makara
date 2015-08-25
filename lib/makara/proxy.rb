@@ -147,8 +147,6 @@ module Makara
       # for testing purposes
       pool = _appropriate_pool(method_name, args)
 
-      DTraceProvider.fire!(:proxy_appropriate_pool, pool.object_id)
-
       yield pool
 
     rescue ::Makara::Errors::AllConnectionsBlacklisted, ::Makara::Errors::NoConnectionsAvailable => e
@@ -165,15 +163,20 @@ module Makara
     def _appropriate_pool(method_name, args)
       # the args provided absolutely need master
       if needs_master?(method_name, args)
+        DTraceProvider.fire!(:proxy_appropriate_pool, 'master')
+
         stick_to_master(method_name, args)
         @master_pool
 
       # in this context, we've already stuck to master
       elsif Makara::Context.get_current == @master_context
+        DTraceProvider.fire!(:proxy_appropriate_pool, 'master')
+
         @master_pool
 
       # the previous context stuck us to master
       elsif previously_stuck_to_master?
+        DTraceProvider.fire!(:proxy_appropriate_pool, 'master')
 
         # we're only on master because of the previous context so
         # behave like we're sticking to master but store the current context
@@ -182,11 +185,13 @@ module Makara
 
       # all slaves are down (or empty)
       elsif @slave_pool.completely_blacklisted?
+        DTraceProvider.fire!(:proxy_appropriate_pool, 'master')
         stick_to_master(method_name, args)
         @master_pool
 
       # yay! use a slave
       else
+        DTraceProvider.fire!(:proxy_appropriate_pool, 'replica')
         @slave_pool
       end
     end
