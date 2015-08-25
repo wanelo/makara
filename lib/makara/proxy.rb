@@ -147,6 +147,8 @@ module Makara
       # for testing purposes
       pool = _appropriate_pool(method_name, args)
 
+      DTraceProvider.fire!(:proxy_appropriate_pool, pool.object_id)
+
       yield pool
 
     rescue ::Makara::Errors::AllConnectionsBlacklisted, ::Makara::Errors::NoConnectionsAvailable => e
@@ -210,6 +212,7 @@ module Makara
 
 
     def stick_to_master(method_name, args, write_to_cache = true)
+      DTraceProvider.fire!(:proxy_stick_to_master)
       # if we're already stuck to master, don't bother doing it again
       return if @master_context == Makara::Context.get_current
 
