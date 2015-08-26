@@ -16,10 +16,13 @@ module Makara
       end
 
       def read(key)
-        store.try(:read, key)
+        store.try(:read, key).tap do |value|
+          DTraceProvider.fire!(:cache_read, key, value.to_s)
+        end
       end
 
       def write(key, value, ttl)
+        DTraceProvider.fire!(:cache_write, key, value, ttl.to_i)
         store.try(:write, key, value, :expires_in => ttl.to_i)
       end
 

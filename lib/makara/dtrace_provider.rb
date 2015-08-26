@@ -8,6 +8,10 @@ module Makara
       @provider = USDT::Provider.create(:ruby, :makara)
 
       @probes = {
+        # args: key, value
+        cache_read: provider.probe(:cache, :read, :string, :string),
+        # args: key, value, ttl
+        cache_write: provider.probe(:cache, :write, :string, :string, :integer),
         # args: context_hash
         context_get_current: provider.probe(:context, :get_current, :string),
         # args: context_hash
